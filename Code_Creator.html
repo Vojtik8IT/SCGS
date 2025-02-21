@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #output { margin-top: 20px; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+        button { padding: 10px 20px; font-size: 16px; margin: 5px; border: none; cursor: pointer; border-radius: 5px; }
+        #start-btn { background-color: #28a745; color: white; }
+        #stop-btn { background-color: #dc3545; color: white; }
+        #continue-btn { background-color: #28a745; color: white; display: none; }
+        #print-btn { background-color: #dc3545; color: white; display: none; }
+    </style>
+</head>
+<body>
+    <h1>Code Generator</h1>
+    <p>Vyberte dobu generování a spusťte program:</p>
+    <select id="time-select">
+        <option value="5">5 minut</option>
+        <option value="10">10 minut</option>
+    </select>
+    <button id="start-btn">Start</button>
+    <button id="stop-btn" style="display: none;">Stop</button>
+    <button id="continue-btn">Pokračovat</button>
+    <button id="print-btn">Ukončit a vytisknout</button>
+    <div id="output"></div>
+
+    <script>
+        let isGenerating = false;
+        let intervalId;
+        let allCodes = [];
+
+        function generateCode() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            return Array.from({ length: 3 }, () =>
+                Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+            ).join('-');
+        }
+
+        function startGeneration() {
+            document.getElementById("start-btn").style.display = "none";
+            document.getElementById("stop-btn").style.display = "inline-block";
+            isGenerating = true;
+            intervalId = setInterval(() => {
+                if (isGenerating) {
+                    const code = generateCode();
+                    allCodes.push(code);
+                    const output = document.getElementById("output");
+                    const codeElement = document.createElement("p");
+                    codeElement.textContent = code;
+                    output.appendChild(codeElement);
+                    output.scrollTop = output.scrollHeight;
+                }
+            }, 100);
+        }
+
+        function stopGeneration() {
+            isGenerating = false;
+            clearInterval(intervalId);
+            document.getElementById("stop-btn").style.display = "none";
+            document.getElementById("continue-btn").style.display = "inline-block";
+            document.getElementById("print-btn").style.display = "inline-block";
+        }
+
+        function continueGeneration() {
+            document.getElementById("continue-btn").style.display = "none";
+            document.getElementById("print-btn").style.display = "none";
+            document.getElementById("stop-btn").style.display = "inline-block";
+            isGenerating = true;
+            startGeneration();
+        }
+
+        function printCodes() {
+            const blob = new Blob([allCodes.join("\n")], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "generated_codes.txt";
+            a.click();
+        }
+
+        document.getElementById("start-btn").addEventListener("click", startGeneration);
+        document.getElementById("stop-btn").addEventListener("click", stopGeneration);
+        document.getElementById("continue-btn").addEventListener("click", continueGeneration);
+        document.getElementById("print-btn").addEventListener("click", printCodes);
+    </script>
+</body>
+</html>
