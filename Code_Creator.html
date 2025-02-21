@@ -3,87 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Generator</title>
+    <title>Secure Code Generator</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        #output { margin-top: 20px; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
-        button { padding: 10px 20px; font-size: 16px; margin: 5px; border: none; cursor: pointer; border-radius: 5px; }
-        #start-btn { background-color: #28a745; color: white; }
-        #stop-btn { background-color: #dc3545; color: white; }
-        #continue-btn { background-color: #28a745; color: white; display: none; }
-        #print-btn { background-color: #dc3545; color: white; display: none; }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .hidden { display: none; }
+        button { margin: 10px; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>Code Generator</h1>
-    <p>Vyberte dobu generování a spusťte program:</p>
-    <select id="time-select">
-        <option value="5">5 minut</option>
-        <option value="10">10 minut</option>
-    </select>
-    <button id="start-btn">Start</button>
-    <button id="stop-btn" style="display: none;">Stop</button>
-    <button id="continue-btn">Pokračovat</button>
-    <button id="print-btn">Ukončit a vytisknout</button>
-    <div id="output"></div>
+    <div id="auth-section">
+        <h2>Login / Register</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="register()">Register</button>
+        <button onclick="login()">Login</button>
+    </div>
+    
+    <div id="generator-section" class="hidden">
+        <h1>Code Generator</h1>
+        <button onclick="generateCode()">Generate Code</button>
+        <p id="output"></p>
+        <button onclick="logout()">Logout</button>
+    </div>
 
     <script>
-        let isGenerating = false;
-        let intervalId;
-        let allCodes = [];
+        function register() {
+            let user = document.getElementById("username").value;
+            let pass = document.getElementById("password").value;
+            if (user && pass) {
+                localStorage.setItem(user, pass);
+                alert("Registration successful!");
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function login() {
+            let user = document.getElementById("username").value;
+            let pass = document.getElementById("password").value;
+            if (localStorage.getItem(user) === pass) {
+                alert("Login successful!");
+                localStorage.setItem("loggedInUser", user);
+                showGenerator();
+            } else {
+                alert("Invalid credentials.");
+            }
+        }
+
+        function showGenerator() {
+            document.getElementById("auth-section").classList.add("hidden");
+            document.getElementById("generator-section").classList.remove("hidden");
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            location.reload();
+        }
 
         function generateCode() {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            return Array.from({ length: 3 }, () =>
-                Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-            ).join('-');
+            let code = Math.random().toString(36).substr(2, 8).toUpperCase();
+            document.getElementById("output").textContent = "Generated Code: " + code;
         }
 
-        function startGeneration() {
-            document.getElementById("start-btn").style.display = "none";
-            document.getElementById("stop-btn").style.display = "inline-block";
-            isGenerating = true;
-            intervalId = setInterval(() => {
-                if (isGenerating) {
-                    const code = generateCode();
-                    allCodes.push(code);
-                    const output = document.getElementById("output");
-                    const codeElement = document.createElement("p");
-                    codeElement.textContent = code;
-                    output.appendChild(codeElement);
-                    output.scrollTop = output.scrollHeight;
-                }
-            }, 100);
+        if (localStorage.getItem("loggedInUser")) {
+            showGenerator();
         }
-
-        function stopGeneration() {
-            isGenerating = false;
-            clearInterval(intervalId);
-            document.getElementById("stop-btn").style.display = "none";
-            document.getElementById("continue-btn").style.display = "inline-block";
-            document.getElementById("print-btn").style.display = "inline-block";
-        }
-
-        function continueGeneration() {
-            document.getElementById("continue-btn").style.display = "none";
-            document.getElementById("print-btn").style.display = "none";
-            document.getElementById("stop-btn").style.display = "inline-block";
-            isGenerating = true;
-            startGeneration();
-        }
-
-        function printCodes() {
-            const blob = new Blob([allCodes.join("\n")], { type: "text/plain" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "generated_codes.txt";
-            a.click();
-        }
-
-        document.getElementById("start-btn").addEventListener("click", startGeneration);
-        document.getElementById("stop-btn").addEventListener("click", stopGeneration);
-        document.getElementById("continue-btn").addEventListener("click", continueGeneration);
-        document.getElementById("print-btn").addEventListener("click", printCodes);
     </script>
 </body>
 </html>
