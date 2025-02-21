@@ -1,2 +1,2 @@
 # SCGS
-**Welcome to SCGS or Steam Code Generator System
+**Welcome to SCGS or Steam Code Generator System**
